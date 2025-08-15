@@ -9,7 +9,6 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import compression from 'compression';
 import helmet from 'helmet';
@@ -19,6 +18,7 @@ import helmet from 'helmet';
  */
 import config from './config';
 import limiter from './lib/express_rate_limit';
+import { connectToData, disconnectFromData } from './lib/mongoose';
 
 /**
  * Router
@@ -94,6 +94,7 @@ app.use(limiter);
 
 (async () => {
   try {
+    await connectToData();
     app.use('/api/v1/', v1Router);
 
     app.listen(config.PORT, () => {
@@ -119,8 +120,9 @@ app.use(limiter);
 
 const handelServerShutdown = async () => {
   try {
-    console.log('【⏻】Server SHUTDOWN');
-    process.exit(1);
+    await disconnectFromData();
+    console.log('【⏻】Shutting down server...');
+    process.exit(0);
   } catch (error) {
     console.log('Error during server shutdown', error);
   }

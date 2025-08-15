@@ -4,6 +4,9 @@
     "module": "CommonJS",
     "rootDir": "src",
     "baseUrl": "./",
+    "paths": {
+      "src/*": ["src/*"]
+    },
     "outDir": "dist",
     "removeComments": true,
     "esModuleInterop": true,

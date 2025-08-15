@@ -11,6 +11,7 @@ const config = {
   PORT: process.env.PORT || 3000,
   NODE_ENV: process.env.NODE_ENV,
   WHITELIST_ORIGINS: ['https://www.youtube.com'],
+  MONGOOSE_URL: process.env.MONGOOSE_URL,
 };
 
 export default config;
