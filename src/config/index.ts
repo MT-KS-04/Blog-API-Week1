@@ -12,6 +12,7 @@ const config = {
   NODE_ENV: process.env.NODE_ENV,
   WHITELIST_ORIGINS: ['https://www.youtube.com'],
   MONGOOSE_URL: process.env.MONGOOSE_URL,
+  LOG_LEVELS: process.env.LOG_LEVELS,
 };
 
 export default config;

@@ -11,7 +11,7 @@ import mongoose from 'mongoose';
  * Custom Modules
  */
 import config from 'src/config';
-
+import { logger } from './winston';
 /**
  * Types
  */
@@ -37,7 +37,7 @@ const connectToData = async (): Promise<void> => {
 
   try {
     await mongoose.connect(config.MONGOOSE_URL, clientOptions);
-    console.log('✅ Connected to MongoDB successfully.', {
+    logger.info('✅ Connected to MongoDB successfully.', {
       url: config.MONGOOSE_URL,
       option: clientOptions,
     });
@@ -46,14 +46,14 @@ const connectToData = async (): Promise<void> => {
       console.error('❌ Failed to connect to MongoDB:', err.message);
       throw err;
     }
-    console.log('❌ Failed to connect to MongoDB:', err);
+    logger.error('❌ Failed to connect to MongoDB:', err);
   }
 };
 
 const disconnectFromData = async (): Promise<void> => {
   try {
     await mongoose.disconnect();
-    console.log('✅ Disconnect the database successfully', {
+    logger.info('✅ Disconnect the database successfully', {
       url: config.MONGOOSE_URL,
       option: clientOptions,
     });
@@ -62,7 +62,7 @@ const disconnectFromData = async (): Promise<void> => {
       throw new Error(err.message);
     }
 
-    console.log('⚠️ Error disconnect from the database.', err);
+    logger.error('⚠️ Error disconnect from the database.', err);
   }
 };
 
