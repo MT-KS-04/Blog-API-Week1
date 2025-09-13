@@ -35,7 +35,10 @@ const register = async (req: Request, res: Response): Promise<void> => {
     logger.warn(
       `User with email ${email} tried to register as an admin but is not in the white list`,
     );
+
+    return;
   }
+
   try {
     const username = genUsername();
     const newUser = await User.create({
