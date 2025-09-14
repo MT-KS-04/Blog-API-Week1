@@ -72,6 +72,8 @@ const login = async (req: Request, res: Response): Promise<void> => {
       message: 'Internal server error',
       error: error,
     });
+
+    logger.error('Error during user login', error);
   }
 };
 

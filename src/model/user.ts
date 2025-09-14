@@ -20,6 +20,7 @@ export interface IUse {
     website?: string;
     facebook?: string;
     instagram?: string;
+    linkedin?: string;
     x?: string;
     youtube?: string;
   };
@@ -82,6 +83,10 @@ const userSchema = new Schema<IUse>(
       instagram: {
         type: String,
         maxLength: [100, 'Instagram address must be less than 100 characters'],
+      },
+      linkedin: {
+        type: String,
+        maxLength: [100, 'linkedin address must be less than 100 characters'],
       },
       x: {
         type: String,

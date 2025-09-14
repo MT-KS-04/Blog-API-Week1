@@ -16,6 +16,8 @@ import bcrypt from 'bcrypt';
 import register from 'src/controller/v1/auth/register';
 import login from 'src/controller/v1/auth/login';
 import refreshToken from 'src/controller/v1/auth/refresh_token';
+import logout from 'src/controller/v1/auth/logout';
+
 /**
  * Middlewares
  */
@@ -25,6 +27,7 @@ import validationError from 'src/middleware/validationError';
  * Modules
  */
 import User from 'src/model/user';
+import authenticate from 'src/middleware/authenticate';
 
 const router = Router();
 
@@ -111,4 +114,6 @@ router.post(
   validationError,
   refreshToken,
 );
+
+router.post('/logout', authenticate, logout);
 export default router;
