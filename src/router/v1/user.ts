@@ -24,6 +24,10 @@ import authorize from 'src/middleware/authorize';
  */
 import getCurrentUser from 'src/controller/v1/user/get_current_user';
 import updateCurrentUser from 'src/controller/v1/user/update_current_user';
+import deleteCurrentUser from 'src/controller/v1/user/delete_user';
+import getAllCurrentUser from 'src/controller/v1/user/get_all_current_user';
+import getUserByID from 'src/controller/v1/user/get_user_by_id';
+
 /**
  * Models
  */
@@ -88,6 +92,38 @@ router.put(
     .withMessage('Url must be less than 100 characters'),
   validationError,
   updateCurrentUser,
+);
+
+router.delete(
+  '/current',
+  authenticate,
+  authorize(['admin', 'user']),
+  deleteCurrentUser,
+);
+
+router.get(
+  '/',
+  authenticate,
+  authorize(['admin']),
+  query('limit')
+    .optional()
+    .isInt({ min: 1, max: 50 })
+    .withMessage('Limit must be between 1 to 50'),
+  query('offset')
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage('offset must be a positive integer '),
+  validationError,
+  getAllCurrentUser,
+);
+
+router.get(
+  '/:userId',
+  authenticate,
+  authorize(['admin']),
+  param('userId').notEmpty().isMongoId().withMessage('Invalid user ID'),
+  validationError,
+  getUserByID,
 );
 
 export default router;
