@@ -18,11 +18,11 @@ import User from 'src/model/user';
  */
 import type { Request, Response } from 'express';
 
-const getUserByID = async (req: Request, res: Response): Promise<void> => {
+const deleteUserByID = async (req: Request, res: Response): Promise<void> => {
   const userId = req.params.userId;
 
   try {
-    const user = await User.findById(userId).select('-__v').lean().exec();
+    const user = await User.deleteOne({ _id: userId });
 
     if (!user) {
       res.status(404).json({
@@ -32,9 +32,9 @@ const getUserByID = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    res.status(201).json({
-      user,
-    });
+    logger.info('A current account user has been deleted', { userId });
+
+    res.sendStatus(204);
   } catch (error) {
     res.status(500).json({
       code: 'ServerError',
@@ -42,8 +42,8 @@ const getUserByID = async (req: Request, res: Response): Promise<void> => {
       error: error,
     });
 
-    logger.error('Error while retrieving an existing user by ID', error);
+    logger.error('Error while deleting current user by ID', error);
   }
 };
 
-export default getUserByID;
+export default deleteUserByID;
