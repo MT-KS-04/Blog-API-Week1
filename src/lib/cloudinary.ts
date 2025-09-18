@@ -19,9 +19,6 @@ import { logger } from './winston';
  * Types
  */
 import type { UploadApiResponse } from 'cloudinary';
-import { buffer } from 'stream/consumers';
-import { resolve } from 'path';
-import { rejects } from 'assert';
 
 cloudinary.config({
   cloud_name: config.CLOUDINARY_CLOUD_NAME,

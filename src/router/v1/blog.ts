@@ -22,6 +22,8 @@ import uploadBlogBanner from 'src/middleware/uploadBlogBanner';
 import createBlog from 'src/controller/v1/blog/create_blog';
 import getAllBlogs from 'src/controller/v1/blog/get_all_blogs';
 import getBlogByUser from 'src/controller/v1/blog/get_blog_by_user';
+import getBlogBySlug from 'src/controller/v1/blog/get_blog_by_slug';
+import updateBlog from 'src/controller/v1/blog/update_blog';
 
 const upload = multer();
 
@@ -79,5 +81,34 @@ router.get(
     .withMessage('offset must be a positive integer '),
   validationError,
   getBlogByUser,
+);
+
+router.get(
+  '/:slug',
+  authenticate,
+  authorize(['admin', 'user']),
+  param('slug').notEmpty().withMessage('Slug is required'),
+  validationError,
+  getBlogBySlug,
+);
+
+router.put(
+  '/:blogId',
+  authenticate,
+  authorize(['admin']),
+  param('blogId').notEmpty().withMessage('Invalid blog ID'),
+  upload.single('banner_image'),
+  body('title')
+    .optional()
+    .isLength({ max: 180 })
+    .withMessage('Title must be less than 180 characters'),
+  body('content'),
+  body('status')
+    .optional()
+    .isIn(['draft', 'published'])
+    .withMessage('Status must be one of the values, draft or published'),
+  validationError,
+  uploadBlogBanner('put'),
+  updateBlog,
 );
 export default router;
