@@ -4,6 +4,11 @@
  */
 
 /**
+ * Node Modules
+ */
+import { v2 as cloudinary } from 'cloudinary';
+
+/**
  * Custom Modules
  */
 import { logger } from 'src/lib/winston';
@@ -12,6 +17,7 @@ import { logger } from 'src/lib/winston';
  * Models
  */
 import User from 'src/model/user';
+import Blog from 'src/model/blog';
 
 /**
  * Types
@@ -22,6 +28,22 @@ const deleteUserByID = async (req: Request, res: Response): Promise<void> => {
   const userId = req.params.userId;
 
   try {
+    const blogs = await Blog.find({ author: userId })
+      .select('banner.publicId')
+      .lean()
+      .exec();
+
+    const publicIds = blogs.map(({ banner }) => banner.publicId);
+
+    await cloudinary.api.delete_resources(publicIds);
+
+    await Blog.deleteMany({ author: userId });
+
+    logger.info('Multiple blogs deleted', {
+      userId,
+      blogs,
+    });
+
     const user = await User.deleteOne({ _id: userId });
 
     if (!user) {
