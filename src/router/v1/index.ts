@@ -17,6 +17,8 @@ import authRouter from './auth';
 import userRouter from './user';
 import blogRouter from './blog';
 import likeRouter from './like';
+import commentRouter from './comment';
+
 /**
  * Root Router
  */
@@ -37,5 +39,6 @@ router.use('/auth', authRouter);
 router.use('/users', userRouter);
 router.use('/blogs', blogRouter);
 router.use('/likes', likeRouter);
+router.use('/comment/', commentRouter);
 
 export default router;
