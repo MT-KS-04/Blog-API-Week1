@@ -7,6 +7,7 @@
  * Node Modules
  */
 import winston from 'winston';
+import 'winston-daily-rotate-file';
 
 /**
  * Custom Modules
@@ -35,6 +36,18 @@ if (config.NODE_ENV !== 'production') {
           return `${timestamp} [${level}: ${message}${metaStr}`;
         }),
       ),
+    }),
+  );
+}
+
+// Daily log files (YYYY-MM-DD in filename); rotate early if a file reaches 20MB; drop files older than 14 days
+if (config.NODE_ENV === 'production') {
+  transports.push(
+    new winston.transports.DailyRotateFile({
+      filename: 'logs/application-%DATE%.log',
+      datePattern: 'YYYY-MM-DD',
+      maxSize: '20m',
+      maxFiles: '14d',
     }),
   );
 }
