@@ -22,6 +22,30 @@ import commentRouter from './comment';
 /**
  * Root Router
  */
+
+/**
+ * @openapi
+ * /api/v1/:
+ *   get:
+ *     tags: [Health]
+ *     summary: Health check and API metadata
+ *     responses:
+ *       200:
+ *         description: Service is running
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message: { type: string, example: API is live }
+ *                 status: { type: string, example: ok }
+ *                 version: { type: string, example: 1.0.0 }
+ *                 environment: { type: string }
+ *                 uptime: { type: number, description: Seconds since process start }
+ *                 server: { type: string }
+ *                 docs: { type: string, format: uri }
+ *                 timestamp: { type: string, format: date-time }
+ */
 router.get('/', (req, res) => {
   res.status(200).json({
     message: 'API is live',

@@ -24,6 +24,7 @@ import { logger } from './lib/winston';
  * Router
  */
 import v1Router from './router/v1';
+import { setupSwagger } from './swagger/setupSwagger';
 
 /**
  * Types
@@ -77,6 +78,9 @@ app.use(
     threshold: 1024, // Only compress response larger than 1KB
   }),
 );
+
+// Swagger UI (before helmet so CSP does not block swagger-ui-assets / inline scripts)
+setupSwagger(app);
 
 // Use helmet to enhance security by setting various HTTP header
 app.use(helmet());
