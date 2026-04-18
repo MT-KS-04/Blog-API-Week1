@@ -35,6 +35,22 @@ import User from 'src/model/user';
 
 const router = Router();
 
+/**
+ * @openapi
+ * /api/v1/users/current:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get current authenticated user
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Current user profile
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ */
 router.get(
   '/current',
   authenticate,
@@ -42,6 +58,43 @@ router.get(
   getCurrentUser,
 );
 
+/**
+ * @openapi
+ * /api/v1/users/current:
+ *   put:
+ *     tags: [Users]
+ *     summary: Update current user profile
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username: { type: string, maxLength: 20 }
+ *               email: { type: string, format: email, maxLength: 50 }
+ *               password: { type: string, minLength: 8 }
+ *               first_name: { type: string, maxLength: 20 }
+ *               last_name: { type: string, maxLength: 20 }
+ *               website: { type: string, format: uri, maxLength: 100 }
+ *               facebook: { type: string, format: uri, maxLength: 100 }
+ *               instagram: { type: string, format: uri, maxLength: 100 }
+ *               linkedin: { type: string, format: uri, maxLength: 100 }
+ *               x: { type: string, format: uri, maxLength: 100 }
+ *               youtube: { type: string, format: uri, maxLength: 100 }
+ *     responses:
+ *       200:
+ *         description: Updated
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationError'
+ *       401:
+ *         description: Unauthorized
+ */
 router.put(
   '/current',
   authenticate,
@@ -93,6 +146,22 @@ router.put(
   updateCurrentUser,
 );
 
+/**
+ * @openapi
+ * /api/v1/users/current:
+ *   delete:
+ *     tags: [Users]
+ *     summary: Delete current user account
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       204:
+ *         description: Account deleted (no body)
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
 router.delete(
   '/current',
   authenticate,
@@ -100,6 +169,35 @@ router.delete(
   deleteCurrentUser,
 );
 
+/**
+ * @openapi
+ * /api/v1/users:
+ *   get:
+ *     tags: [Users]
+ *     summary: List users (admin only)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer, minimum: 1, maximum: 50 }
+ *       - in: query
+ *         name: offset
+ *         schema: { type: integer, minimum: 0 }
+ *     responses:
+ *       200:
+ *         description: Paginated users
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationError'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Not admin
+ */
 router.get(
   '/',
   authenticate,
@@ -116,6 +214,35 @@ router.get(
   getAllCurrentUser,
 );
 
+/**
+ * @openapi
+ * /api/v1/users/{userId}:
+ *   get:
+ *     tags: [Users]
+ *     summary: Get user by ID (admin only)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema: { type: string, description: Mongo ObjectId }
+ *     responses:
+ *       200:
+ *         description: User document
+ *       400:
+ *         description: Invalid ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationError'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Not admin
+ *       404:
+ *         description: User not found
+ */
 router.get(
   '/:userId',
   authenticate,
@@ -125,6 +252,37 @@ router.get(
   getUserByID,
 );
 
+/**
+ * @openapi
+ * /api/v1/users/{userId}:
+ *   delete:
+ *     tags: [Users]
+ *     summary: Delete user by ID (admin only)
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       204:
+ *         description: User and related blogs removed (no body)
+ *       400:
+ *         description: Invalid ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationError'
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Not admin
+ *       404:
+ *         description: User not found (controller path)
+ *       500:
+ *         description: Server error
+ */
 router.delete(
   '/:userId',
   authenticate,
