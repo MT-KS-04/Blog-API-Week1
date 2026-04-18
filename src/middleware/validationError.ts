@@ -20,6 +20,7 @@ const validationError = (req: Request, res: Response, next: NextFunction) => {
       code: 'ValidationError',
       errors: error.mapped(),
     });
+    return;
   }
   next();
 };
