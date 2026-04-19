@@ -29,6 +29,9 @@
 - **Blog Lifecycle Management**
   - Full CRUD operations supporting rich text and slugs.
   - Centralized image and media processing with Multer & Cloudinary integration.
+- **Database connectivity**
+  - **MongoDB Atlas** (default): Mongoose connects with Stable API (`serverApi` v1) options from `src/lib/mongoose.ts`.
+  - **Amazon DocumentDB** (optional): set `USE_DOCUMENTDB=true` for TLS + CA file and driver options compatible with DocumentDB (no Stable API).
 - **Social Interactions**
   - Robust commenting and like system directly tied to users and blog posts.
 - **Scalable Architecture**
@@ -313,15 +316,15 @@ sequenceDiagram
 
 3. **Configure environment variables**
 
-   Create a `.env` file in the project root. Values below match `src/config/index.ts`.
+   Copy [`.env.example`](.env.example) to `.env` and fill in values. The list below matches `src/config/index.ts` and `src/lib/mongoose.ts`.
 
    ```env
    # Server
    PORT=3000
    NODE_ENV=development
 
-   # Database
-   MONGOOSE_URL=mongodb+srv://<user>:<pass>@<cluster>/<db>?retryWrites=true&w=majority
+   # Database (connection string; logical DB name is also set in code as blog-api — see mongoose.ts)
+   MONGOOSE_URL=mongodb+srv://<user>:<pass>@<cluster>/?retryWrites=true&w=majority
 
    # JWT — use long random strings in production
    JWT_ACCESS_SECRET=your-access-secret
@@ -329,14 +332,22 @@ sequenceDiagram
    ACCESS_TOKEN_EXPIRY=15m
    REFRESH_TOKEN_EXPIRY=7d
 
-   # Optional logging
+   # Optional logging (Winston level; defaults to info if unset)
    LOG_LEVELS=info
 
    # Cloudinary (required for blog banner upload)
    CLOUDINARY_CLOUD_NAME=your_cloud_name
    CLOUDINARY_API_KEY=your_api_key
    CLOUDINARY_API_SECRET=your_api_secret
+
+   # Amazon DocumentDB — optional; omit or false for MongoDB Atlas
+   # Only the literal string "true" enables DocumentDB mode.
+   USE_DOCUMENTDB=false
+   DOCDB_TLS_CA_FILE=/app/global-bundle.pem
+   DOCDB_DIRECT_CONNECTION=true
    ```
+
+   **Amazon DocumentDB:** when `USE_DOCUMENTDB=true`, Mongoose uses TLS with `tlsCAFile` (`DOCDB_TLS_CA_FILE`, default `/app/global-bundle.pem`), `retryWrites: false`, and `directConnection` from `DOCDB_DIRECT_CONNECTION` (default `true` unless set to `false`). In Docker, mount your RDS CA bundle to that path or override `DOCDB_TLS_CA_FILE`. For Atlas, leave `USE_DOCUMENTDB` unset or `false` so the driver uses Stable API options instead.
 
    **Admin registration:** registering with `role: admin` is only allowed for emails on the server allowlist (`WHITELIST_ADMIN_EMAIL` in `src/config/index.ts`). Everyone else should register as `user` (default).
 
@@ -367,12 +378,14 @@ sequenceDiagram
 
 ### Docker
 
-Multi-stage image (Node 22): builds the app, then runs `node dist/server.js`. From the repo root (after setting env at runtime or via your orchestrator):
+Multi-stage image (Node 22): `npm run build` in the builder stage produces `dist/` and `docs/openapi.json`; the runtime image copies `dist` and `docs`, installs production dependencies, and runs `node dist/server.js`. Example:
 
 ```bash
 docker build -t blog-api .
 docker run --env-file .env -p 3000:3000 blog-api
 ```
+
+For **DocumentDB** inside Docker, mount the CA bundle file and point `DOCDB_TLS_CA_FILE` at the mount path (see `.env.example` comments).
 
 ## 📡 API reference
 
