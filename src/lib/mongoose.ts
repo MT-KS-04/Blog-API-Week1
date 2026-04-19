@@ -17,12 +17,13 @@ import { logger } from './winston';
  */
 import type { ConnectOptions } from 'mongoose';
 
-/**
- * Client Options
- */
-const clientOptions: ConnectOptions = {
+const baseConnectOptions = {
   dbName: 'blog-api',
   appName: 'Blog Api Basic',
+} as const;
+
+const atlasConnectOptions: ConnectOptions = {
+  ...baseConnectOptions,
   serverApi: {
     version: '1',
     strict: true,
@@ -30,16 +31,34 @@ const clientOptions: ConnectOptions = {
   },
 };
 
+/**
+ * Amazon DocumentDB does not support MongoDB Stable API (`serverApi`).
+ * Use TLS + CA file and driver flags compatible with DocumentDB.
+ */
+const getDocumentDbConnectOptions = (): ConnectOptions => ({
+  ...baseConnectOptions,
+  tls: true,
+  tlsCAFile: config.docdbTlsCaFile,
+  retryWrites: false,
+  directConnection: config.docdbDirectConnection,
+});
+
+const getMongoConnectOptions = (): ConnectOptions =>
+  config.useDocumentDb ? getDocumentDbConnectOptions() : atlasConnectOptions;
+
 const connectToData = async (): Promise<void> => {
   if (!config.MONGOOSE_URL) {
     throw new Error('MONGOOSE_URL is not set in environment variables');
   }
 
+  const connectOptions = getMongoConnectOptions();
+
   try {
-    await mongoose.connect(config.MONGOOSE_URL, clientOptions);
+    await mongoose.connect(config.MONGOOSE_URL, connectOptions);
     logger.info('✅ Connected to MongoDB successfully.', {
       url: config.MONGOOSE_URL,
-      option: clientOptions,
+      useDocumentDb: config.useDocumentDb,
+      option: connectOptions,
     });
   } catch (err) {
     if (err instanceof Error) {
@@ -55,7 +74,8 @@ const disconnectFromData = async (): Promise<void> => {
     await mongoose.disconnect();
     logger.info('✅ Disconnect the database successfully', {
       url: config.MONGOOSE_URL,
-      option: clientOptions,
+      useDocumentDb: config.useDocumentDb,
+      option: getMongoConnectOptions(),
     });
   } catch (err) {
     if (err instanceof Error) {

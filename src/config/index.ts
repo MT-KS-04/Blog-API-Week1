@@ -22,12 +22,27 @@ const config = {
   JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET!,
   ACCESS_TOKEN_EXPIRY: process.env.ACCESS_TOKEN_EXPIRY as ms.StringValue,
   REFRESH_TOKEN_EXPIRY: process.env.REFRESH_TOKEN_EXPIRY as ms.StringValue,
-  WHITELIST_ADMIN_EMAIL: ['ktomis2004@gmail.com', 'ktomisAdmin@gmail.com'],
+  WHITELIST_ADMIN_EMAIL: [
+    'ktomis2004@gmail.com',
+    'ktomisAdmin@gmail.com',
+    'admin@gmail.com',
+  ],
   defaultResLimit: 20,
   defaultResOffset: 0,
   CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
+
+  /** Amazon DocumentDB: set USE_DOCUMENTDB=true (string "true" only). */
+  useDocumentDb: process.env.USE_DOCUMENTDB === 'true',
+  /** CA bundle path inside container (e.g. compose mount). */
+  docdbTlsCaFile:
+    process.env.DOCDB_TLS_CA_FILE?.trim() || '/app/global-bundle.pem',
+  /**
+   * DocumentDB: default true unless DOCDB_DIRECT_CONNECTION=false.
+   * Ignored when useDocumentDb is false.
+   */
+  docdbDirectConnection: process.env.DOCDB_DIRECT_CONNECTION !== 'false',
 };
 
 export default config;
