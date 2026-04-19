@@ -11,3 +11,6 @@ build/
 
 # ENV file
 .env
+
+# Documentation
+docs-format.txt
