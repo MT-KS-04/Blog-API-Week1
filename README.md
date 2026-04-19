@@ -32,31 +32,41 @@
 - **Social Interactions**
   - Robust commenting and like system directly tied to users and blog posts.
 - **Scalable Architecture**
-  - Neatly structured MVC-style folder logic (`router`, `controller`, `services`, `middleware`).
-  - Strict typing logic using custom `@types` definitions for robust code execution.
+  - Layered layout: `router` → `middleware` → `controller` → `model` / `lib` (business logic lives mainly in controllers and shared libs).
+  - Strict typing with custom `@types` (e.g. augmented Express request).
+- **API documentation**
+  - OpenAPI spec generated from JSDoc (`swagger-jsdoc`) and served with **Swagger UI** at `/api-docs` (after `npm run generate:openapi` or `npm run build`).
+- **Content safety**
+  - Blog HTML is sanitized with **DOMPurify** (via `jsdom`) before persistence.
 
 ## 🛠️ Tech Stack & Key Libraries
 
-- **Runtime & Framework**: Node.js, Express.js
+- **Runtime & Framework**: Node.js, Express.js 5
 - **Language**: TypeScript
 - **Database**: MongoDB & Mongoose
-- **File Uploads**: Multer & Cloudinary
-- **Logging**: Winston & Morgan
+- **File uploads & media**: Multer, Cloudinary
+- **Auth**: JWT (access token in `Authorization` header), refresh token in **httpOnly** cookie, bcrypt
+- **HTTP**: Helmet, CORS, compression, cookie-parser, express-rate-limit, express-validator
+- **Docs**: swagger-jsdoc, swagger-ui-express
+- **Logging**: Winston (with daily rotate), Morgan
 
 ## 📂 Project Structure
 
 ```text
 src/
-├── @types/       # Custom TypeScript type definitions
-├── config/       # App configuration (Environment variables, constants)
-├── controller/   # API request handlers
-├── lib/          # Third-party library setup (e.g., Mongoose, Winston)
-├── middleware/   # Custom Express middlewares (Auth, Validation, Uploads)
+├── @types/       # Custom TypeScript type definitions (e.g. Express augmentation)
+├── config/       # App configuration (env-backed settings)
+├── controller/   # API handlers (versioned under v1/)
+├── lib/          # Mongoose, JWT, Cloudinary, rate limit, Winston, etc.
+├── middleware/   # Auth, RBAC, validation, upload pipeline
 ├── model/        # Mongoose schemas & models
-├── router/       # API route definitions
-├── services/     # Core business logic
-├── utils/        # Utility functions
-└── server.ts     # Main server entry point
+├── router/       # Route modules (mounted under /api/v1)
+├── swagger/      # Swagger UI wiring (reads generated OpenAPI JSON)
+├── utils/        # Helpers
+└── server.ts     # Application bootstrap
+
+scripts/          # e.g. OpenAPI generation
+docs/             # openapi.json (generated) + optional Markdown docs
 ```
 
 ## 📊 Entity Relationship Diagram (ERD)
@@ -116,6 +126,7 @@ erDiagram
 <summary><b>🧩 Click to expand 5 Core Architecture Sequence Diagrams</b></summary>
 
 ### 1. Unified Authentication Architecture
+
 ```mermaid
 sequenceDiagram
   autonumber
@@ -127,20 +138,20 @@ sequenceDiagram
   Client->>+API: POST /auth/register or /auth/login
   API->>+Controller: Forward Request
   Controller->>+DB: Validate (exists / findOne)
-  
+
   alt Error or Invalid Credentials
     DB-->>Controller: Authentication Error
     Controller-->>API: 400 Bad Request / 401 Unauthorized
     API-->>Client: Return Error
   else Valid Credentials
     DB-->>-Controller: Valid
-    
+
     opt If Register
       Controller->>Controller: bcrypt.hash(password)
       Controller->>+DB: save(newUser)
       DB-->>-Controller: Record created
     end
-    
+
     opt If Login
       Controller->>Controller: bcrypt.compare(password)
       Controller->>Controller: generateTokens()
@@ -154,33 +165,35 @@ sequenceDiagram
 ```
 
 ### 2. Content Publishing & Media Architecture
+
 ```mermaid
 sequenceDiagram
   autonumber
   participant Admin
   participant API as Blog API
-  
+
   box External Service
     participant Cloud as Cloudinary
   end
-  
+
   participant DB as MongoDB
 
   Admin->>+API: POST /blogs {title, image}
   API->>API: authenticate() & authorize('admin')
-  
+
   API->>+Cloud: upload_stream(image_buffer)
   Cloud-->>-API: {secure_url, public_id}
-  
+
   API->>API: genSlug(title)
-  
+
   API->>+DB: save(newBlog {slug, banner_url})
   DB-->>-API: Blog record
-  
+
   API-->>-Admin: 201 Created
 ```
 
 ### 3. User Engagement Lifecycle
+
 ```mermaid
 sequenceDiagram
   autonumber
@@ -207,7 +220,7 @@ sequenceDiagram
       DB-->>-API: Updated
       API-->>-User: 201 Created
     end
-    
+
     opt Like
       User->>+API: POST /like/blog/:blogId
       API->>+DB: findById(blogId)
@@ -223,6 +236,7 @@ sequenceDiagram
 ```
 
 ### 4. User Profile Updating
+
 ```mermaid
 sequenceDiagram
   autonumber
@@ -231,19 +245,19 @@ sequenceDiagram
   participant DB as MongoDB
 
   Client->>+API: PUT /users/current {email, password}
-  
+
   API->>+DB: exists({email}) OR exists({username})
-  
+
   alt Conflict Exists
     DB-->>API: True
     API-->>Client: 400 Bad Request
   else Unique Data
     DB-->>-API: False
-    
+
     opt Provided New Password
       API->>API: bcrypt.hash(password)
     end
-    
+
     API->>+DB: findByIdAndUpdate(userId)
     DB-->>-API: Updated Record
     API-->>-Client: 200 OK
@@ -251,6 +265,7 @@ sequenceDiagram
 ```
 
 ### 5. Admin Moderation Architecture
+
 ```mermaid
 sequenceDiagram
   autonumber
@@ -268,7 +283,7 @@ sequenceDiagram
   opt Delete Violating Content
     Admin->>+API: DELETE /blogs/:blogId
     API->>+DB: findByIdAndDelete(blogId)
-    
+
     alt Blog Not Found
       DB-->>API: null
       API-->>Admin: 404 Not Found
@@ -296,78 +311,138 @@ sequenceDiagram
    npm install
    ```
 
-3. **Configure Environment Variables**
-   Create a `.env` file in the root directory. Feel free to adjust values according to your configuration.
+3. **Configure environment variables**
+
+   Create a `.env` file in the project root. Values below match `src/config/index.ts`.
 
    ```env
-   MONGOOSE_URL=mongodb+srv://<username>:<password>@cluster0.mongodb.net/?retryWrites=true&w=majority
+   # Server
    PORT=3000
    NODE_ENV=development
-   # Add other required variables (JWT secrets, Cloudinary keys, etc.)
+
+   # Database
+   MONGOOSE_URL=mongodb+srv://<user>:<pass>@<cluster>/<db>?retryWrites=true&w=majority
+
+   # JWT — use long random strings in production
+   JWT_ACCESS_SECRET=your-access-secret
+   JWT_REFRESH_SECRET=your-refresh-secret
+   ACCESS_TOKEN_EXPIRY=15m
+   REFRESH_TOKEN_EXPIRY=7d
+
+   # Optional logging
+   LOG_LEVELS=info
+
+   # Cloudinary (required for blog banner upload)
+   CLOUDINARY_CLOUD_NAME=your_cloud_name
+   CLOUDINARY_API_KEY=your_api_key
+   CLOUDINARY_API_SECRET=your_api_secret
    ```
 
-   > ⚠️ **Note:** Do not commit your `.env` file, as it contains sensitive information.
+   **Admin registration:** registering with `role: admin` is only allowed for emails on the server allowlist (`WHITELIST_ADMIN_EMAIL` in `src/config/index.ts`). Everyone else should register as `user` (default).
 
-4. **Run the Project (Development mode with hot-reload)**
+   **CORS:** in `development`, arbitrary browser origins are allowed; in production, origins must match `WHITELIST_ORIGINS` in config (extend the array if you deploy a separate frontend).
+
+   > ⚠️ **Note:** Never commit `.env`; it holds secrets and connection strings.
+
+4. **Generate OpenAPI (for `/api-docs`)**
+
+   Swagger UI reads `docs/openapi.json`. Generate it before opening the docs (or run a full build, which runs generation first).
+
+   ```bash
+   npm run generate:openapi
+   ```
+
+5. **Run in development (hot reload via nodemon + ts-node)**
+
    ```bash
    npm start
    ```
 
-## 📡 API Reference
+6. **Production build & run**
 
-Base path for all API endpoints is: `/api/v1`
+   ```bash
+   npm run build
+   npm run start:prod
+   ```
+
+### Docker
+
+Multi-stage image (Node 22): builds the app, then runs `node dist/server.js`. From the repo root (after setting env at runtime or via your orchestrator):
+
+```bash
+docker build -t blog-api .
+docker run --env-file .env -p 3000:3000 blog-api
+```
+
+## 📡 API reference
+
+Base path for versioned JSON APIs: **`/api/v1`**.
+
+Interactive docs: **`GET /api-docs`** (Swagger UI; serves `docs/openapi.json`. Regenerate with `npm run generate:openapi` or `npm run build` after you change `@openapi` JSDoc on routes.)
+
+### Calling authenticated routes
+
+- Send **`Authorization: Bearer <accessToken>`** on protected routes.
+- **`POST /api/v1/auth/register`** and **`POST /api/v1/auth/login`** set an **`httpOnly` `refreshToken` cookie** used by **`POST /api/v1/auth/refresh-token`** (cookie must be sent with that request).
+- **`POST /api/v1/auth/logout`** requires a valid access token and clears the refresh cookie.
 
 ### 🩺 System
 
-| Method | Endpoint | Description                    | Access |
-| :----- | :------- | :----------------------------- | :----- |
-| `GET`  | `/`      | API Healthcheck & general info | Public |
+| Method | Endpoint   | Description                         | Access |
+| :----- | :--------- | :---------------------------------- | :----- |
+| `GET`  | `/api/v1/` | Health check, version, uptime, docs | Public |
 
-### 🔐 Authentication (`/auth`)
+### 🔐 Authentication (`/api/v1/auth`)
 
-| Method | Endpoint              | Description                                     | Access        |
-| :----- | :-------------------- | :---------------------------------------------- | :------------ |
-| `POST` | `/auth/register`      | Register a new user account                     | Public        |
-| `POST` | `/auth/login`         | Log into an existing account                    | Public        |
-| `POST` | `/auth/refresh-token` | Obtain a new access token using a refresh token | Public        |
-| `POST` | `/auth/logout`        | Log out and invalidate sessions                 | Authenticated |
+| Method | Endpoint              | Description                                                                                 | Access      |
+| :----- | :-------------------- | :------------------------------------------------------------------------------------------ | :---------- |
+| `POST` | `/auth/register`      | Register (username generated server-side; optional `role`; admin only if email allowlisted) | Public      |
+| `POST` | `/auth/login`         | Login; sets refresh cookie; returns `accessToken` and `user`                                | Public      |
+| `POST` | `/auth/refresh-token` | New access token (requires `refreshToken` cookie)                                           | Public      |
+| `POST` | `/auth/logout`        | Log out; clears refresh cookie                                                              | Bearer auth |
 
-### 🧑‍💻 Users (`/users`)
+### 🧑‍💻 Users (`/api/v1/users`)
 
-| Method   | Endpoint         | Description                          | Access       |
-| :------- | :--------------- | :----------------------------------- | :----------- |
-| `GET`    | `/users/current` | Retrieve current user profile        | Admin / User |
-| `PUT`    | `/users/current` | Update current user profile details  | Admin / User |
-| `DELETE` | `/users/current` | Delete current user account          | Admin / User |
-| `GET`    | `/users`         | Retrieve a list of all users         | Admin Only   |
-| `GET`    | `/users/:userId` | Retrieve a specific user by their ID | Admin Only   |
-| `DELETE` | `/users/:userId` | Delete a specific user by their ID   | Admin Only   |
+| Method   | Endpoint         | Description                                                                    | Access       |
+| :------- | :--------------- | :----------------------------------------------------------------------------- | :----------- |
+| `GET`    | `/users/current` | Retrieve current user profile                                                  | Admin / User |
+| `PUT`    | `/users/current` | Update profile (optional: `username`, `email`, `password`, names, social URLs) | Admin / User |
+| `DELETE` | `/users/current` | Delete current user account                                                    | Admin / User |
+| `GET`    | `/users`         | Retrieve a list of all users                                                   | Admin Only   |
+| `GET`    | `/users/:userId` | Retrieve a specific user by their ID                                           | Admin Only   |
+| `DELETE` | `/users/:userId` | Delete a specific user by their ID                                             | Admin Only   |
 
-### 📝 Blogs (`/blogs`)
+### 📝 Blogs (`/api/v1/blogs`)
 
-| Method   | Endpoint              | Description                                | Access       |
-| :------- | :-------------------- | :----------------------------------------- | :----------- |
-| `POST`   | `/blogs`              | Create a new blog post                     | Admin Only   |
-| `GET`    | `/blogs`              | Retrieve a list of all blog posts          | Admin Only   |
-| `GET`    | `/blogs/user/:userId` | Retrieve all blog posts by a specific user | Admin Only   |
-| `GET`    | `/blogs/:slug`        | Retrieve a blog post by its URL slug       | Admin / User |
-| `PUT`    | `/blogs/:blogId`      | Update an existing blog post               | Admin Only   |
-| `DELETE` | `/blogs/:blogId`      | Delete a blog post                         | Admin Only   |
+| Method   | Endpoint              | Description                                                                                         | Access       |
+| :------- | :-------------------- | :-------------------------------------------------------------------------------------------------- | :----------- |
+| `POST`   | `/blogs`              | Create post (`multipart/form-data`: `title`, `content`, optional `banner_image`, optional `status`) | Admin only   |
+| `GET`    | `/blogs`              | List posts with pagination (`limit` 1–50, `offset` ≥ 0)                                             | Admin only   |
+| `GET`    | `/blogs/user/:userId` | List posts by author (`limit`, `offset`)                                                            | Admin only   |
+| `GET`    | `/blogs/:slug`        | Get post by slug (increments engagement in handler)                                                 | Admin / User |
+| `PUT`    | `/blogs/:blogId`      | Update post (multipart; optional fields)                                                            | Admin only   |
+| `DELETE` | `/blogs/:blogId`      | Delete post                                                                                         | Admin only   |
 
-### 💬 Comments (`/comment`)
+### 💬 Comments (`/api/v1/comment`)
 
 | Method   | Endpoint                   | Description                                 | Access       |
 | :------- | :------------------------- | :------------------------------------------ | :----------- |
 | `POST`   | `/comment/blog/:blogId`    | Add a comment to a specific blog post       | Admin / User |
 | `GET`    | `/comment/blog/:blogId`    | Get all comments under a specific blog post | Admin / User |
-| `DELETE` | `/comment/blog/:commentId` | Delete a specific comment                   | Admin / User |
+| `DELETE` | `/comment/blog/:commentId` | Delete comment (owner or admin)             | Admin / User |
 
-### ❤️ Likes (`/likes`)
+### ❤️ Likes (`/api/v1/likes`)
 
-| Method   | Endpoint              | Description                         | Access       |
-| :------- | :-------------------- | :---------------------------------- | :----------- |
-| `POST`   | `/likes/blog/:blogId` | Like a specific blog post           | Admin / User |
-| `DELETE` | `/likes/blog/:blogId` | Unlike a previously liked blog post | Admin / User |
+| Method   | Endpoint              | Description                                                                              | Access       |
+| :------- | :-------------------- | :--------------------------------------------------------------------------------------- | :----------- |
+| `POST`   | `/likes/blog/:blogId` | Like a blog; JSON body **`{ "userId": "<mongoId>" }`** (must match auth user in clients) | Admin / User |
+| `DELETE` | `/likes/blog/:blogId` | Unlike; same JSON body with `userId`                                                     | Admin / User |
+
+Responses follow route handlers (e.g. like may return updated `likesCount`; unlike may return **204**).
+
+## 📚 Extra documentation
+
+Human-readable guides (installation, security, database notes, per-resource API pages) live under the [`docs/`](docs/) folder — start from [`docs/README.md`](docs/README.md) if present.
 
 ## 👥 Author & Contact
 
@@ -385,6 +460,6 @@ This project is distributed under the **Apache License 2.0**. See the `LICENSE` 
 ---
 
 <p align="center">
-  <b>© 2026 KTOMIS. All rights reserved.</b><br/>
+  <b>© 2026 MT-KS-04. All rights reserved.</b><br/>
   <em>A robust and scalable RESTful API for a Blog platform. Built with TypeScript, Express, and MongoDB (Mongoose).</em>
 </p>
