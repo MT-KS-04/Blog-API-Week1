@@ -1,19 +1,19 @@
-# Bình luận (v1)
+# Comments (v1)
 
-Base path: **`/api/v1/comment`** (số ít **`comment`**, không phải `comments`).
+Base path: **`/api/v1/comment`** (singular **`comment`**, not `comments`).
 
-Cần Bearer; role `admin` hoặc `user`.
+Requires Bearer authentication; roles `admin` or `user`.
 
 ## Endpoints
 
-| Method | Path | Mô tả |
-|--------|------|--------|
-| POST | `/blog/:blogId` | JSON `{ "content": "..." }` — tạo comment; 201 kèm `comment` và `commentsCount` |
-| GET | `/blog/:blogId` | Danh sách comment của blog; body response dùng key **`comment`** (mảng) |
-| DELETE | `/blog/:commentId` | Xóa comment theo **ID comment** (param là `commentId`, không phải `blogId`) — 204 khi thành công |
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/blog/:blogId` | JSON `{ "content": "..." }` — create comment; `201` with `comment` and `commentsCount` |
+| GET | `/blog/:blogId` | List comments for a blog; response body uses the **`comment`** key (array) |
+| DELETE | `/blog/:commentId` | Delete a comment by **comment id** (param is `commentId`, not `blogId`) — `204` on success |
 
-## Quyền xóa
+## Delete permissions
 
-Controller cho phép xóa nếu là chủ comment hoặc **admin**.
+The controller allows deletion by the comment author or an **admin**.
 
-Chi tiết: [openapi.json](../openapi.json).
+Details: [openapi.json](../openapi.json).

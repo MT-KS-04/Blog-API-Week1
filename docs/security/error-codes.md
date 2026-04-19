@@ -1,8 +1,8 @@
-# Mã lỗi và định dạng response
+# Error codes and response shape
 
 ## Validation (express-validator)
 
-Khi validator chain báo lỗi trước controller:
+When the validator chain fails before the controller:
 
 - **HTTP 400**
 - Body:
@@ -14,32 +14,32 @@ Khi validator chain báo lỗi trước controller:
 }
 ```
 
-`errors` là object dạng `express-validator` `mapped()` (theo field).
+`errors` follows express-validator's `mapped()` shape (per field).
 
-## Lỗi xác thực (JWT access)
+## Authentication (access JWT)
 
-Middleware `authenticate` thường trả **401** với:
+The `authenticate` middleware typically returns **401** with:
 
 - `code: AuthenticationError`
-- `message` mô tả (thiếu token, hết hạn, không hợp lệ, …)
+- `message` describing the failure (missing token, expired, invalid, etc.)
 
-## Mã `code` thường gặp trong controller
+## Common `code` values from controllers
 
-| HTTP | `code` (ví dụ) | Ngữ cảnh gợi ý |
-|------|----------------|-----------------|
-| 400 | `ValidationError` | Validator |
-| 400 | `BadRequest` | Ví dụ đã like blog |
-| 401 | `AuthenticationError` | Refresh không hợp lệ / hết hạn |
-| 403 | `AuthorizationError` | Không đủ quyền (vd đăng ký admin, blog) |
-| 403 | `Authorization` | Một số chỗ comment delete (tên code trong code) |
-| 404 | `NotFound` | User, blog, comment, like, … |
-| 500 | `ServerError` | Lỗi không mong đợi |
+| HTTP | `code` (examples) | Typical context |
+|------|-------------------|-----------------|
+| 400 | `ValidationError` | Validator failure |
+| 400 | `BadRequest` | e.g. already liked the blog |
+| 401 | `AuthenticationError` | Invalid or expired refresh |
+| 403 | `AuthorizationError` | Insufficient permission (e.g. admin registration, blog) |
+| 403 | `Authorization` | Some comment-delete paths (as named in code) |
+| 404 | `NotFound` | User, blog, comment, like, etc. |
+| 500 | `ServerError` | Unexpected server error |
 
-Một số response có thêm field `message` và/hoặc `error` (chi tiết lỗi) tùy endpoint.
+Some responses also include `message` and/or `error` depending on the endpoint.
 
 > [!info]
-> **Rate limit:** vượt ngưỡng toàn cục có thể nhận **429** với message text từ `express-rate-limit` (không cùng schema JSON với `ValidationError`).
+> **Rate limiting:** exceeding the global limit may return **429** with a plain-text message from `express-rate-limit` (not the same JSON shape as `ValidationError`).
 
-## Thành công không body
+## Success with no body
 
-Một số thao tác trả **204 No Content** (không JSON): ví dụ logout thành công, xóa user, xóa blog, xóa comment, unlike blog — xem từng endpoint trong OpenAPI / Swagger.
+Some operations return **204 No Content** (no JSON), for example successful logout, user delete, blog delete, comment delete, and unlike — see each operation in OpenAPI / Swagger.

@@ -1,31 +1,31 @@
-# Xác thực và token
+# Authentication and tokens
 
 ## Access token (JWT)
 
-- Gửi qua header: **`Authorization: Bearer <access_token>`** (có khoảng sau `Bearer`).
-- Payload chứa `userId` (Mongo ObjectId); ký bằng `JWT_ACCESS_SECRET`, thời hạn `ACCESS_TOKEN_EXPIRY` (chuỗi dạng `ms` / `jsonwebtoken`, ví dụ `15m`).
-- Middleware `authenticate` từ chối nếu thiếu prefix Bearer, token hết hạn, hoặc không hợp lệ — thường trả **401** với `code: AuthenticationError`.
+- Sent in the header: **`Authorization: Bearer <access_token>`** (space after `Bearer`).
+- Payload includes `userId` (Mongo ObjectId); signed with `JWT_ACCESS_SECRET`, lifetime `ACCESS_TOKEN_EXPIRY` (`ms`-style / `jsonwebtoken`, e.g. `15m`).
+- The `authenticate` middleware returns **401** with `code: AuthenticationError` when the Bearer prefix is missing, the token is expired, or invalid.
 
 > [!warning]
-> Luôn gửi đúng dạng `Bearer ` + token; thiếu hoặc sai định dạng sẽ 401.
+> Always use the exact `Bearer ` + token format; missing or malformed headers yield `401`.
 
 ## Refresh token
 
-- Là JWT riêng, ký bằng `JWT_REFRESH_SECRET`, TTL `REFRESH_TOKEN_EXPIRY`.
-- Lưu bản ghi trong collection **Token** và đồng thời set cookie **`refreshToken`** (httpOnly, `secure` khi `NODE_ENV=production`, `sameSite: strict`).
-- Endpoint `POST /api/v1/auth/refresh-token` đọc cookie — không dùng Bearer cho bước này.
+- Separate JWT, signed with `JWT_REFRESH_SECRET`, TTL `REFRESH_TOKEN_EXPIRY`.
+- A row is stored in the **Token** collection and an httpOnly **`refreshToken`** cookie is set (`secure` when `NODE_ENV=production`, `sameSite: strict`).
+- `POST /api/v1/auth/refresh-token` reads the cookie — do not use Bearer for this step.
 
-## Đăng xuất
+## Logout
 
-`POST /api/v1/auth/logout` cần Bearer; xóa refresh trong DB và `clearCookie`.
+`POST /api/v1/auth/logout` requires Bearer auth; removes the refresh token from the database and clears the cookie.
 
 ## CORS
 
-Origin được phép hiện đang khai báo trong `config.WHITELIST_ORIGINS` (mã nguồn). Môi trường `development` hoặc request không có header `Origin` có logic nới trong CORS — xem `src/server.ts` và `src/config/index.ts` khi triển khai production.
+Allowed origins are defined in `config.WHITELIST_ORIGINS` in source. In `development`, or when the `Origin` header is absent, CORS behavior is more permissive — see `src/server.ts` and `src/config/index.ts` for production hardening.
 
-## Bảo vệ HTTP khác
+## Other HTTP protections
 
-- **Helmet** bật cho các route sau Swagger (header bảo mật).
-- **express-rate-limit:** 100 request / 15 phút / IP (toàn app, trừ thứ tự middleware — Swagger UI đặt trước limiter nên tải `/api-docs` không bị tính vào cùng chồng limit như API nếu cấu hình hiện tại).
+- **Helmet** is applied to routes registered after Swagger (security-related headers).
+- **express-rate-limit:** 100 requests per 15 minutes per IP (global). Swagger UI is mounted before the limiter, so loading `/api-docs` is not counted against the same limiter bucket as API traffic under the current setup.
 
-Chi tiết endpoint: [openapi.json](../openapi.json).
+Endpoint details: [openapi.json](../openapi.json).

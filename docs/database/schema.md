@@ -1,14 +1,14 @@
-# Mô tả schema (Mongoose)
+# Schema (Mongoose)
 
-Persistence dùng **MongoDB** qua **Mongoose**. Không dùng Prisma/SQL.
+Data is stored in **MongoDB** via **Mongoose**. This project does not use Prisma or SQL.
 
 ## User (`User`)
 
-| Field | Kiểu / ghi chú |
-|-------|------------------|
+| Field | Type / notes |
+|-------|----------------|
 | `username` | String, required, unique, max 20 |
 | `email` | String, required, unique, max 50 |
-| `password` | String, required, `select: false`, hash bcrypt khi `save` |
+| `password` | String, required, `select: false`, bcrypt-hashed on `save` |
 | `role` | `admin` \| `user`, default `user` |
 | `firstName`, `lastName` | String, optional, max 20 |
 | `socialLink.*` | `website`, `facebook`, `instagram`, `linkedin`, `x`, `youtube` — optional, max 100 |
@@ -16,38 +16,38 @@ Persistence dùng **MongoDB** qua **Mongoose**. Không dùng Prisma/SQL.
 
 ## Blog (`Blog`)
 
-| Field | Kiểu / ghi chú |
-|-------|------------------|
+| Field | Type / notes |
+|-------|----------------|
 | `title` | String, required, max 180 |
-| `slug` | String, required, unique; auto từ `title` nếu trống (pre-validate) |
+| `slug` | String, required, unique; auto from `title` if empty (pre-validate) |
 | `content` | String, required |
-| `banner` | `{ publicId, url, width, height }` — required ở schema |
+| `banner` | `{ publicId, url, width, height }` — required in schema |
 | `author` | ObjectId ref `User` |
 | `viewCount`, `likesCount`, `commentsCount` | Number, default 0 |
 | `status` | `draft` \| `published`, default `draft` |
-| timestamps | `publishedAt` (map `createdAt`), `updatedAt` |
+| timestamps | `publishedAt` (maps `createdAt`), `updatedAt` |
 
 ## Comment (`Comment`)
 
-| Field | Kiểu / ghi chú |
-|-------|------------------|
-| `blogId` | ObjectId, required (không khai báo `ref` trong schema) |
+| Field | Type / notes |
+|-------|----------------|
+| `blogId` | ObjectId, required (no `ref` in schema) |
 | `userId` | ObjectId ref `User`, required |
 | `content` | String, required, max 1000 |
 
 ## Like (`Like`)
 
-| Field | Kiểu / ghi chú |
-|-------|------------------|
-| `blogId` | ObjectId, optional trên schema |
-| `commentId` | ObjectId, optional (route v1 hiện chỉ dùng like blog) |
+| Field | Type / notes |
+|-------|----------------|
+| `blogId` | ObjectId, optional in schema |
+| `commentId` | ObjectId, optional (v1 routes only use blog likes) |
 | `userId` | ObjectId ref `User`, required |
 
 ## Token (`Token`)
 
-| Field | Kiểu / ghi chú |
-|-------|------------------|
-| `token` | String, required — refresh JWT lưu server-side |
+| Field | Type / notes |
+|-------|----------------|
+| `token` | String, required — refresh JWT stored server-side |
 | `userId` | ObjectId, required |
 
-Nguồn: thư mục `src/model/` trong repo.
+Source: `src/model/` in the repository.

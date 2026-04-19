@@ -4,27 +4,27 @@ Base path: `/api/v1/auth`
 
 ## Endpoints
 
-| Method | Path | Mô tả |
-|--------|------|--------|
-| POST | `/register` | Tạo tài khoản; username do server sinh; cookie `refreshToken` + body có `accessToken` |
-| POST | `/login` | Đăng nhập email/mật khẩu; set cookie + `accessToken` |
-| POST | `/refresh-token` | Cấp access token mới từ cookie `refreshToken` (JWT) |
-| POST | `/logout` | Cần header Bearer; xóa refresh token trong DB và xóa cookie |
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/register` | Create an account; server-generated username; sets `refreshToken` cookie; response includes `accessToken` |
+| POST | `/login` | Email/password login; sets cookie and returns `accessToken` |
+| POST | `/refresh-token` | Issue a new access token using the `refreshToken` cookie (JWT) |
+| POST | `/logout` | Requires `Authorization: Bearer`; removes refresh token from the database and clears the cookie |
 
-## Request / response
+## Request and response
 
-- **Register / Login (JSON):** `email`, `password` (tối thiểu **8** ký tự theo rule validator; một số message lỗi trong code vẫn có thể nói "20 characters" — hãy tin rule min 8).
-- **Register:** có thể gửi thêm `role` (`admin` \| `user`). Đăng ký `admin` chỉ được nếu email nằm trong whitelist trong config server.
-- **Refresh:** không dùng Bearer; gửi cookie `refreshToken` (httpOnly; `secure` khi `NODE_ENV=production`; `sameSite=strict`).
+- **Register / login (JSON):** `email`, `password` (minimum **8** characters per validator rules; some error messages in code may still say "20 characters" — trust the minimum length of 8).
+- **Register:** optional `role` (`admin` \| `user`). Registering as `admin` is only allowed if the email is on the server allowlist in config.
+- **Refresh:** do not use Bearer; send the `refreshToken` cookie (httpOnly; `secure` when `NODE_ENV=production`; `sameSite=strict`).
 - **Logout:** header `Authorization: Bearer <accessToken>`.
 
 > [!warning]
-> Trong response register/login, object `user` có thể chứa field `password` (dạng hash) theo implementation hiện tại — client không nên hiển thị hoặc log.
+> Register/login responses may include a `password` field on the `user` object (hashed) in the current implementation — clients must not display or log it.
 
-## Luồng refresh (tóm tắt)
+## Refresh flow (summary)
 
-1. Login/Register lưu refresh JWT vào collection `Token` và set cookie `refreshToken`.
-2. Client gọi `POST /auth/refresh-token` với cookie — nhận JSON `{ accessToken }`.
-3. Logout xóa bản ghi token và `clearCookie`.
+1. Login/register persists the refresh JWT in the `Token` collection and sets the `refreshToken` cookie.
+2. The client calls `POST /auth/refresh-token` with the cookie and receives `{ accessToken }`.
+3. Logout deletes the token record and calls `clearCookie`.
 
-Chi tiết schema: xem [openapi.json](../openapi.json) và Swagger UI `/api-docs`.
+For full schemas, see [openapi.json](../openapi.json) and Swagger UI at `/api-docs`.

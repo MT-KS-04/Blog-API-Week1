@@ -1,72 +1,72 @@
-# Cài đặt dự án
+# Installation
 
-## Yêu cầu
+## Requirements
 
-- **Node.js** 22 (khớp Dockerfile) hoặc LTS tương thích
-- **MongoDB** (Atlas hoặc bản cài local) — URI kết nối qua biến môi trường
+- **Node.js** 22 (matches the Dockerfile) or a compatible LTS
+- **MongoDB** (Atlas or local) — connection string via environment variables
 
-## Cài dependency
+## Install dependencies
 
 ```bash
 npm install
 ```
 
-## Biến môi trường
+## Environment variables
 
-Tạo file `.env` ở thư mục gốc project (không commit file thật). Tham chiếu tên biến từ `.env.example` trong repo:
+Create a `.env` file in the project root (do not commit real secrets). Variable names follow `.env.example` in the repository:
 
-| Biến | Mô tả |
-|------|--------|
-| `PORT` | Cổng HTTP (mặc định code có thể dùng 3000) |
+| Variable | Description |
+|----------|-------------|
+| `PORT` | HTTP port (defaults may use 3000 in code) |
 | `NODE_ENV` | `development` \| `production` \| `test` |
-| `MONGOOSE_URL` | Chuỗi kết nối MongoDB (**không** dùng tên `MONGO_URI` nếu không khớp code) |
-| `LOG_LEVELS` | Mức log Winston (vd: `info`) |
-| `JWT_ACCESS_SECRET` | Secret ký JWT access |
-| `JWT_REFRESH_SECRET` | Secret ký JWT refresh |
-| `ACCESS_TOKEN_EXPIRY` | Thời hạn access (chuỗi kiểu `ms`, vd `15m`) |
-| `REFRESH_TOKEN_EXPIRY` | Thời hạn refresh |
-| `CLOUDINARY_CLOUD_NAME` | Tên cloud Cloudinary |
-| `CLOUDINARY_API_KEY` | API key |
-| `CLOUDINARY_API_SECRET` | API secret |
+| `MONGOOSE_URL` | MongoDB connection string (**not** `MONGO_URI` unless you change the code) |
+| `LOG_LEVELS` | Winston log level (e.g. `info`) |
+| `JWT_ACCESS_SECRET` | Secret used to sign access JWTs |
+| `JWT_REFRESH_SECRET` | Secret used to sign refresh JWTs |
+| `ACCESS_TOKEN_EXPIRY` | Access token lifetime (`ms`-style string, e.g. `15m`) |
+| `REFRESH_TOKEN_EXPIRY` | Refresh token lifetime |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
+| `CLOUDINARY_API_KEY` | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
 
 > [!warning]
-> Không dán secret thật vào tài liệu công khai hoặc GitBook — chỉ mô tả tên biến.
+> Never paste real secrets into public documentation or GitBook — document variable names only.
 
-**CORS:** danh sách origin cho phép đang cấu hình trong mã nguồn (`config.WHITELIST_ORIGINS`). Khi deploy domain mới, cần chỉnh code hoặc refactor sang env.
+**CORS:** allowed origins are configured in source (`config.WHITELIST_ORIGINS`). For a new production domain, update the code or refactor to read from environment variables.
 
-## OpenAPI cho Swagger UI
+## OpenAPI for Swagger UI
 
-Server đọc spec tại `docs/openapi.json`. Trước lần chạy đầu hoặc sau khi sửa JSDoc `@openapi` trên router:
+The server loads the spec from `docs/openapi.json`. Before the first run, or after editing `@openapi` JSDoc on routers:
 
 ```bash
 npm run generate:openapi
 ```
 
-Hoặc chạy full build (đã gọi generate):
+Or run a full build (which runs generate first):
 
 ```bash
 npm run build
 ```
 
-## Chạy ứng dụng
+## Run the application
 
 - **Development (nodemon + ts-node):** `npm start`  
-  (Project **không** định nghĩa script `npm run dev`; dùng `npm start`.)
+  This project does **not** define `npm run dev`; use `npm start`.
 
-- **Production (sau `npm run build`):** `npm run start:prod`  
-  Chạy `node dist/server.js` — cần MongoDB và `.env` hợp lệ.
+- **Production (after `npm run build`):** `npm run start:prod`  
+  Runs `node dist/server.js` — requires MongoDB and a valid `.env`.
 
 ## Docker
 
-Build image trong repo đã có `Dockerfile`: stage build chạy `npm run build` (gồm generate OpenAPI), image chạy copy `dist/` và `docs/` (để `/api-docs` đọc được `openapi.json`).
+The repository includes a `Dockerfile`: the build stage runs `npm run build` (including OpenAPI generation), and the runtime image copies both `dist/` and `docs/` so `/api-docs` can read `openapi.json`.
 
 ```bash
 docker compose up --build
 ```
 
-(Điều chỉnh lệnh nếu bạn dùng `docker build` trực tiếp.)
+(Adjust if you use `docker build` directly.)
 
-## Kiểm tra nhanh
+## Quick verification
 
-1. `GET http://localhost:<PORT>/api/v1/` — 200 nếu server và DB đã kết nối.
-2. `GET http://localhost:<PORT>/api-docs` — giao diện Swagger.
+1. `GET http://localhost:<PORT>/api/v1/` — expect `200` when the server and database are connected.
+2. `GET http://localhost:<PORT>/api-docs` — Swagger UI.

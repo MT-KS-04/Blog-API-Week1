@@ -1,6 +1,6 @@
-# Sơ đồ quan hệ (ERD)
+# Entity relationship diagram (ERD)
 
-Quan hệ logic giữa các collection (Mongoose). Một số liên kết chỉ là ObjectId không có `ref` trong schema nhưng vẫn được dùng trong ứng dụng.
+Logical relationships between collections (Mongoose). Some links are plain ObjectIds without a `ref` in the schema but are still used by the application.
 
 ```mermaid
 erDiagram
@@ -12,9 +12,9 @@ erDiagram
     Blog ||--o{ Like : "blogId"
 ```
 
-- **Blog → User:** `Blog.author` ref `User`.
-- **Comment → User:** `Comment.userId` ref `User`.
-- **Comment → Blog:** `Comment.blogId` là ObjectId (không ref trong schema).
-- **Like → User:** `Like.userId` ref `User`.
-- **Like → Blog:** `Like.blogId` ObjectId (không ref trong schema).
-- **Token → User:** `Token.userId` ObjectId (không ref trong schema).
+- **Blog → User:** `Blog.author` references `User`.
+- **Comment → User:** `Comment.userId` references `User`.
+- **Comment → Blog:** `Comment.blogId` is an ObjectId (no `ref` in schema).
+- **Like → User:** `Like.userId` references `User`.
+- **Like → Blog:** `Like.blogId` is an ObjectId (no `ref` in schema).
+- **Token → User:** `Token.userId` is an ObjectId (no `ref` in schema).

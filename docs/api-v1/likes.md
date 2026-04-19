@@ -1,19 +1,19 @@
-# Lượt thích — Likes (v1)
+# Likes (v1)
 
 Base path: `/api/v1/likes`
 
-Cần Bearer; role `admin` hoặc `user`.
+Requires Bearer authentication; roles `admin` or `user`.
 
 ## Endpoints
 
-| Method | Path | Body | Mô tả |
-|--------|------|------|--------|
-| POST | `/blog/:blogId` | JSON **`{ "userId": "<MongoId>" }`** | Like blog; 200 với `likesCount`; 400 nếu đã like |
-| DELETE | `/blog/:blogId` | JSON **`{ "userId": "<MongoId>" }`** | Unlike — **204** không body khi thành công |
+| Method | Path | Body | Description |
+|--------|------|------|-------------|
+| POST | `/blog/:blogId` | JSON **`{ "userId": "<MongoId>" }`** | Like a blog; `200` with `likesCount`; `400` if already liked |
+| DELETE | `/blog/:blogId` | JSON **`{ "userId": "<MongoId>" }`** | Unlike — **`204`** with no body on success |
 
 > [!warning]
-> API **bắt buộc** `userId` trong body theo contract hiện tại. Client nên gửi đúng user đang đăng nhập; server không thay thế tự động từ JWT trong handler like.
+> The API **requires** `userId` in the JSON body by contract. Clients should send the authenticated user's id; the like handler does not substitute it from the JWT automatically.
 
-Schema `Like` trong DB còn có field `commentId` (dùng cho like comment trong tương lai); các route v1 hiện tại chỉ thao tác theo `blogId`.
+The `Like` schema also has `commentId` (for future comment likes); v1 routes only operate on `blogId`.
 
-Chi tiết: [openapi.json](../openapi.json).
+Details: [openapi.json](../openapi.json).

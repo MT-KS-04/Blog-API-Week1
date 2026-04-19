@@ -1,29 +1,29 @@
 # Blog API
 
-REST API cho nền tảng blog, xây dựng bằng **Node.js**, **TypeScript**, **Express 5**, **MongoDB** (Mongoose), xác thực **JWT** (access token + refresh cookie), upload banner qua **Cloudinary**.
+REST API for a blog platform, built with **Node.js**, **TypeScript**, **Express 5**, **MongoDB** (Mongoose), **JWT** authentication (access token + refresh cookie), and **Cloudinary** for banner uploads.
 
-## Tính năng chính
+## Features
 
-- Đăng ký / đăng nhập / làm mới access token / đăng xuất
-- Quản lý người dùng (profile, danh sách và xóa theo quyền admin)
-- CRUD blog (slug, trạng thái draft/published, banner multipart)
-- Bình luận theo bài viết
-- Like / Unlike bài viết
-- Giới hạn tốc độ request toàn cục (`express-rate-limit`), Helmet, CORS có whitelist
+- Register, login, refresh access token, logout
+- User management (profile, admin-only listing and deletion)
+- Blog CRUD (slug, `draft` / `published`, multipart banner)
+- Comments on posts
+- Like / unlike posts
+- Global rate limiting (`express-rate-limit`), Helmet, CORS with an allowlist
 
-## Base URL và phiên bản
+## Base URL and version
 
-- Tiền tố API: **`/api/v1/`** (ví dụ: `https://your-host/api/v1/auth/login`).
+- API prefix: **`/api/v1/`** (example: `https://your-host/api/v1/auth/login`).
 
-### Health check (không cần đăng nhập)
+### Health check (no authentication)
 
-`GET /api/v1/` trả về JSON trạng thái dịch vụ: `message`, `status`, `version`, `environment`, `uptime`, `server`, `docs` (URL tài liệu), `timestamp`. Dùng cho monitoring hoặc kiểm tra nhanh sau deploy.
+`GET /api/v1/` returns a JSON payload with `message`, `status`, `version`, `environment`, `uptime`, `server`, `docs` (documentation URL), and `timestamp`. Use it for monitoring or a quick post-deploy check.
 
-## Tài liệu kỹ thuật
+## Technical documentation
 
-- [Cài đặt và biến môi trường](installation.md)
-- **Swagger UI** (khi server chạy): mở `{origin}/api-docs` để thử request và xem schema sinh từ OpenAPI.
-- File spec: [openapi.json](openapi.json) — cập nhật bằng `npm run generate:openapi` (hoặc `npm run build`) sau khi đổi JSDoc trên router.
+- [Installation and environment](installation.md)
+- **Swagger UI** (when the server is running): open `{origin}/api-docs` to try requests and view the schema generated from OpenAPI.
+- Spec file: [openapi.json](openapi.json) — regenerate with `npm run generate:openapi` (or `npm run build`) after changing `@openapi` JSDoc on routers.
 
 > [!info]
-> Sau mỗi thay đổi endpoint, chạy `npm run generate:openapi` rồi commit `docs/openapi.json` cùng code để GitBook và Swagger luôn đồng bộ.
+> After any endpoint change, run `npm run generate:openapi` and commit `docs/openapi.json` with your code so GitBook and Swagger stay in sync.
