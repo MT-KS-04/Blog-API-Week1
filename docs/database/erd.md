@@ -1,4 +1,4 @@
-# Entity relationship diagram (ERD)
+# 🔗 Entity relationship diagram (ERD)
 
 Logical relationships between collections (Mongoose). Some links are plain ObjectIds without a `ref` in the schema but are still used by the application.
 
@@ -11,6 +11,8 @@ erDiagram
     Blog ||--o{ Comment : "blogId"
     Blog ||--o{ Like : "blogId"
 ```
+
+## 🧩 Relationships
 
 - **Blog → User:** `Blog.author` references `User`.
 - **Comment → User:** `Comment.userId` references `User`.

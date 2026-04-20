@@ -1,8 +1,8 @@
-# Schema (Mongoose)
+# 🗄️ Schema (Mongoose)
 
 Data is stored in **MongoDB** via **Mongoose**. This project does not use Prisma or SQL.
 
-## User (`User`)
+## 👤 User (`User`)
 
 | Field | Type / notes |
 |-------|----------------|
@@ -14,7 +14,7 @@ Data is stored in **MongoDB** via **Mongoose**. This project does not use Prisma
 | `socialLink.*` | `website`, `facebook`, `instagram`, `linkedin`, `x`, `youtube` — optional, max 100 |
 | timestamps | `createdAt`, `updatedAt` |
 
-## Blog (`Blog`)
+## 📝 Blog (`Blog`)
 
 | Field | Type / notes |
 |-------|----------------|
@@ -27,7 +27,7 @@ Data is stored in **MongoDB** via **Mongoose**. This project does not use Prisma
 | `status` | `draft` \| `published`, default `draft` |
 | timestamps | `publishedAt` (maps `createdAt`), `updatedAt` |
 
-## Comment (`Comment`)
+## 💬 Comment (`Comment`)
 
 | Field | Type / notes |
 |-------|----------------|
@@ -35,7 +35,7 @@ Data is stored in **MongoDB** via **Mongoose**. This project does not use Prisma
 | `userId` | ObjectId ref `User`, required |
 | `content` | String, required, max 1000 |
 
-## Like (`Like`)
+## ❤️ Like (`Like`)
 
 | Field | Type / notes |
 |-------|----------------|
@@ -43,7 +43,7 @@ Data is stored in **MongoDB** via **Mongoose**. This project does not use Prisma
 | `commentId` | ObjectId, optional (v1 routes only use blog likes) |
 | `userId` | ObjectId ref `User`, required |
 
-## Token (`Token`)
+## 🔑 Token (`Token`)
 
 | Field | Type / notes |
 |-------|----------------|
