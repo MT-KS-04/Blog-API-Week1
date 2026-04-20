@@ -1,9 +1,9 @@
-# Installation
+﻿# Installation
 
 ## Requirements
 
 - **Node.js** 22 (matches the Dockerfile) or a compatible LTS
-- **MongoDB** (Atlas or local) — connection string via environment variables
+- **MongoDB** (Atlas or local) â€” connection string via environment variables
 
 ## Install dependencies
 
@@ -30,7 +30,7 @@ Create a `.env` file in the project root (do not commit real secrets). Variable 
 | `CLOUDINARY_API_SECRET` | Cloudinary API secret |
 
 > [!warning]
-> Never paste real secrets into public documentation or GitBook — document variable names only.
+> ⚠️ Never paste real secrets into public documentation or GitBook â€” document variable names only.
 
 **CORS:** allowed origins are configured in source (`config.WHITELIST_ORIGINS`). For a new production domain, update the code or refactor to read from environment variables.
 
@@ -54,7 +54,7 @@ npm run build
   This project does **not** define `npm run dev`; use `npm start`.
 
 - **Production (after `npm run build`):** `npm run start:prod`  
-  Runs `node dist/server.js` — requires MongoDB and a valid `.env`.
+  Runs `node dist/server.js` â€” requires MongoDB and a valid `.env`.
 
 ## Docker
 
@@ -68,5 +68,5 @@ docker compose up --build
 
 ## Quick verification
 
-1. `GET http://localhost:<PORT>/api/v1/` — expect `200` when the server and database are connected.
-2. `GET http://localhost:<PORT>/api-docs` — Swagger UI.
+1. `GET http://localhost:<PORT>/api/v1/` â€” expect `200` when the server and database are connected.
+2. `GET http://localhost:<PORT>/api-docs` â€” Swagger UI.

@@ -10,7 +10,12 @@
   },
   "servers": [
     {
-      "url": "/"
+      "url": "https://mk-ts-04.site",
+      "description": "Production"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Local"
     }
   ],
   "tags": [
@@ -85,9 +90,7 @@
   "paths": {
     "/api/v1/auth/register": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "Register a new user",
         "description": "Username is generated server-side. Admin role is rejected unless the email is in the server allowlist (`WHITELIST_ADMIN_EMAIL`).\nPassword rule: minimum **8** characters (`isLength({ min: 8 })`). Validator messages may incorrectly say \"20 characters\"; trust the min 8 rule.\n",
         "requestBody": {
@@ -96,10 +99,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "email",
-                  "password"
-                ],
+                "required": ["email", "password"],
                 "properties": {
                   "email": {
                     "type": "string",
@@ -113,10 +113,7 @@
                   },
                   "role": {
                     "type": "string",
-                    "enum": [
-                      "admin",
-                      "user"
-                    ],
+                    "enum": ["admin", "user"],
                     "description": "Optional; default user"
                   }
                 }
@@ -150,10 +147,7 @@
                         },
                         "role": {
                           "type": "string",
-                          "enum": [
-                            "admin",
-                            "user"
-                          ]
+                          "enum": ["admin", "user"]
                         }
                       }
                     }
@@ -183,9 +177,7 @@
     },
     "/api/v1/auth/login": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "Login with email and password",
         "description": "Password minimum **8** characters (same validator message quirk as register).",
         "requestBody": {
@@ -194,10 +186,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "email",
-                  "password"
-                ],
+                "required": ["email", "password"],
                 "properties": {
                   "email": {
                     "type": "string",
@@ -266,9 +255,7 @@
     },
     "/api/v1/auth/refresh-token": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "Issue a new access token using refresh cookie",
         "security": [
           {
@@ -315,9 +302,7 @@
     },
     "/api/v1/auth/logout": {
       "post": {
-        "tags": [
-          "Auth"
-        ],
+        "tags": ["Auth"],
         "summary": "Log out (clear refresh token)",
         "security": [
           {
@@ -339,9 +324,7 @@
     },
     "/api/v1/blogs": {
       "post": {
-        "tags": [
-          "Blogs"
-        ],
+        "tags": ["Blogs"],
         "summary": "Create blog (admin only)",
         "security": [
           {
@@ -354,10 +337,7 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "title",
-                  "content"
-                ],
+                "required": ["title", "content"],
                 "properties": {
                   "banner_image": {
                     "type": "string",
@@ -373,10 +353,7 @@
                   },
                   "status": {
                     "type": "string",
-                    "enum": [
-                      "draft",
-                      "published"
-                    ]
+                    "enum": ["draft", "published"]
                   }
                 }
               }
@@ -422,9 +399,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Blogs"
-        ],
+        "tags": ["Blogs"],
         "summary": "List all blogs (admin only)",
         "security": [
           {
@@ -475,9 +450,7 @@
     },
     "/api/v1/blogs/user/{userId}": {
       "get": {
-        "tags": [
-          "Blogs"
-        ],
+        "tags": ["Blogs"],
         "summary": "List blogs by author user ID (admin only)",
         "security": [
           {
@@ -536,9 +509,7 @@
     },
     "/api/v1/blogs/{slug}": {
       "get": {
-        "tags": [
-          "Blogs"
-        ],
+        "tags": ["Blogs"],
         "summary": "Get blog by slug (admin or user)",
         "security": [
           {
@@ -583,9 +554,7 @@
     },
     "/api/v1/blogs/{blogId}": {
       "put": {
-        "tags": [
-          "Blogs"
-        ],
+        "tags": ["Blogs"],
         "summary": "Update blog (admin only)",
         "description": "Router requires **admin** role. `banner` and other fields are applied after upload middleware when provided.",
         "security": [
@@ -622,10 +591,7 @@
                   },
                   "status": {
                     "type": "string",
-                    "enum": [
-                      "draft",
-                      "published"
-                    ]
+                    "enum": ["draft", "published"]
                   }
                 }
               }
@@ -673,9 +639,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Blogs"
-        ],
+        "tags": ["Blogs"],
         "summary": "Delete blog (admin only)",
         "description": "Router requires **admin** role.",
         "security": [
@@ -724,9 +688,7 @@
     },
     "/api/v1/comment/blog/{blogId}": {
       "post": {
-        "tags": [
-          "Comments"
-        ],
+        "tags": ["Comments"],
         "summary": "Add comment on blog",
         "security": [
           {
@@ -749,9 +711,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "content"
-                ],
+                "required": ["content"],
                 "properties": {
                   "content": {
                     "type": "string"
@@ -802,9 +762,7 @@
         }
       },
       "get": {
-        "tags": [
-          "Comments"
-        ],
+        "tags": ["Comments"],
         "summary": "List comments for a blog",
         "security": [
           {
@@ -854,9 +812,7 @@
     },
     "/api/v1/comment/blog/{commentId}": {
       "delete": {
-        "tags": [
-          "Comments"
-        ],
+        "tags": ["Comments"],
         "summary": "Delete a comment by ID",
         "security": [
           {
@@ -895,9 +851,7 @@
     },
     "/api/v1/": {
       "get": {
-        "tags": [
-          "Health"
-        ],
+        "tags": ["Health"],
         "summary": "Health check and API metadata",
         "responses": {
           "200": {
@@ -947,9 +901,7 @@
     },
     "/api/v1/likes/blog/{blogId}": {
       "post": {
-        "tags": [
-          "Likes"
-        ],
+        "tags": ["Likes"],
         "summary": "Like a blog",
         "description": "Requires `userId` in JSON body (Mongo ObjectId). The handler uses it as given (ensure it matches the authenticated user on the client).\n",
         "security": [
@@ -973,9 +925,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "userId"
-                ],
+                "required": ["userId"],
                 "properties": {
                   "userId": {
                     "type": "string",
@@ -1040,9 +990,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Likes"
-        ],
+        "tags": ["Likes"],
         "summary": "Unlike a blog",
         "security": [
           {
@@ -1065,9 +1013,7 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "userId"
-                ],
+                "required": ["userId"],
                 "properties": {
                   "userId": {
                     "type": "string"
@@ -1121,9 +1067,7 @@
     },
     "/api/v1/users/current": {
       "get": {
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "summary": "Get current authenticated user",
         "security": [
           {
@@ -1143,9 +1087,7 @@
         }
       },
       "put": {
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "summary": "Update current user profile",
         "security": [
           {
@@ -1234,9 +1176,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "summary": "Delete current user account",
         "security": [
           {
@@ -1258,9 +1198,7 @@
     },
     "/api/v1/users": {
       "get": {
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "summary": "List users (admin only)",
         "security": [
           {
@@ -1311,9 +1249,7 @@
     },
     "/api/v1/users/{userId}": {
       "get": {
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "summary": "Get user by ID (admin only)",
         "security": [
           {
@@ -1357,9 +1293,7 @@
         }
       },
       "delete": {
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "summary": "Delete user by ID (admin only)",
         "security": [
           {

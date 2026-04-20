@@ -1,4 +1,4 @@
-# Authentication and tokens
+﻿# Authentication and tokens
 
 ## Access token (JWT)
 
@@ -7,13 +7,13 @@
 - The `authenticate` middleware returns **401** with `code: AuthenticationError` when the Bearer prefix is missing, the token is expired, or invalid.
 
 > [!warning]
-> Always use the exact `Bearer ` + token format; missing or malformed headers yield `401`.
+> ⚠️ Always use the exact `Bearer ` + token format; missing or malformed headers yield `401`.
 
 ## Refresh token
 
 - Separate JWT, signed with `JWT_REFRESH_SECRET`, TTL `REFRESH_TOKEN_EXPIRY`.
 - A row is stored in the **Token** collection and an httpOnly **`refreshToken`** cookie is set (`secure` when `NODE_ENV=production`, `sameSite: strict`).
-- `POST /api/v1/auth/refresh-token` reads the cookie — do not use Bearer for this step.
+- `POST /api/v1/auth/refresh-token` reads the cookie â€” do not use Bearer for this step.
 
 ## Logout
 
@@ -21,7 +21,7 @@
 
 ## CORS
 
-Allowed origins are defined in `config.WHITELIST_ORIGINS` in source. In `development`, or when the `Origin` header is absent, CORS behavior is more permissive — see `src/server.ts` and `src/config/index.ts` for production hardening.
+Allowed origins are defined in `config.WHITELIST_ORIGINS` in source. In `development`, or when the `Origin` header is absent, CORS behavior is more permissive â€” see `src/server.ts` and `src/config/index.ts` for production hardening.
 
 ## Other HTTP protections
 
