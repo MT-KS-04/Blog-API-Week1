@@ -15,7 +15,11 @@ dotenv.config();
 const config = {
   PORT: process.env.PORT || 3000,
   NODE_ENV: process.env.NODE_ENV,
-  WHITELIST_ORIGINS: ['https://docs.blog-api.mk-ts-04.com'],
+  WHITELIST_ORIGINS: [
+    'https://mk-ts-04.com',
+    'https://blog-api.mk-ts-04.com',
+    'https://docs.blog-api.mk-ts-04.com',
+  ],
   MONGOOSE_URL: process.env.MONGOOSE_URL,
   LOG_LEVELS: process.env.LOG_LEVELS,
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET!,
