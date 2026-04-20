@@ -5,19 +5,21 @@
 <h1 align="center">🚀 Blog API - Week 1</h1>
 
 <p align="center">
-  <strong>A robust and scalable RESTful API for a Blog platform. Built with TypeScript, Express, and MongoDB (Mongoose).</strong>
+  <strong>A robust and scalable RESTful API for a Blog platform. Built with TypeScript, Express, and Mongoose (MongoDB Atlas / AWS DocumentDB compatible).</strong>
 </p>
 <p align="center">
   <em>This project is a backend service for a blog application, featuring authentication, role-based access control (Admin & User), article management, and social interactions (comments & likes). It acts as a foundational template, demonstrating the use of robust architectural patterns and modern Node.js/TypeScript practices.</em>
 </p>
 
 <p align="center">
-  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-18%2B-green?style=flat&logo=nodedotjs" alt="Node Version" /></a>
-  <a href="https://expressjs.com/"><img src="https://img.shields.io/badge/Express.js-5.1-black?style=flat&logo=express" alt="Express" /></a>
-  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.9-blue?style=flat&logo=typescript" alt="TypeScript" /></a>
-  <a href="https://www.mongodb.com/"><img src="https://img.shields.io/badge/MongoDB-8.x-green?style=flat&logo=mongodb" alt="MongoDB" /></a>
-  <a href="https://jwt.io/"><img src="https://img.shields.io/badge/Auth-JWT-orange?style=flat&logo=jsonwebtokens" alt="JWT" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat" alt="License" /></a>
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-18%2B-5FA04E?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js" style="border-radius: 8px;" /></a>
+  <a href="https://expressjs.com/"><img src="https://img.shields.io/badge/Express.js-5.1-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express.js" style="border-radius: 8px;" /></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" style="border-radius: 8px;" /></a>
+  <a href="https://aws.amazon.com/ec2/"><img src="https://img.shields.io/badge/AWS-EC2-FF9900?style=for-the-badge&logo=amazonec2&logoColor=white" alt="AWS EC2" style="border-radius: 8px;" /></a>
+  <a href="https://aws.amazon.com/documentdb/"><img src="https://img.shields.io/badge/AWS-DocumentDB-3F8624?style=for-the-badge&logo=amazonaws&logoColor=white" alt="AWS DocumentDB" style="border-radius: 8px;" /></a>
+  <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-Containerized-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" style="border-radius: 8px;" /></a>
+  <a href="https://jwt.io/"><img src="https://img.shields.io/badge/Auth-JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white" alt="JWT" style="border-radius: 8px;" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-2D7FF9?style=for-the-badge&logo=apache&logoColor=white" alt="Apache 2.0 License" style="border-radius: 8px;" /></a>
 </p>
 
 ## ✨ Key Features
@@ -30,8 +32,8 @@
   - Full CRUD operations supporting rich text and slugs.
   - Centralized image and media processing with Multer & Cloudinary integration.
 - **Database connectivity**
-  - **MongoDB Atlas** (default): Mongoose connects with Stable API (`serverApi` v1) options from `src/lib/mongoose.ts`.
-  - **Amazon DocumentDB** (optional): set `USE_DOCUMENTDB=true` for TLS + CA file and driver options compatible with DocumentDB (no Stable API).
+  - **MongoDB Atlas**: Mongoose uses Stable API (`serverApi` v1) options from `src/lib/mongoose.ts`.
+  - **Amazon DocumentDB (production-ready mode)**: set `USE_DOCUMENTDB=true` for TLS + CA file and driver options compatible with DocumentDB (no Stable API).
 - **Social Interactions**
   - Robust commenting and like system directly tied to users and blog posts.
 - **Scalable Architecture**
@@ -46,12 +48,13 @@
 
 - **Runtime & Framework**: Node.js, Express.js 5
 - **Language**: TypeScript
-- **Database**: MongoDB & Mongoose
+- **Database**: AWS DocumentDB (production), MongoDB Atlas (compatible), Mongoose
 - **File uploads & media**: Multer, Cloudinary
 - **Auth**: JWT (access token in `Authorization` header), refresh token in **httpOnly** cookie, bcrypt
 - **HTTP**: Helmet, CORS, compression, cookie-parser, express-rate-limit, express-validator
 - **Docs**: swagger-jsdoc, swagger-ui-express
 - **Logging**: Winston (with daily rotate), Morgan
+- **Infrastructure & Deploy**: AWS EC2, Nginx reverse proxy, Let's Encrypt TLS, Docker (multi-stage build)
 
 ## 📂 Project Structure
 
@@ -347,13 +350,16 @@ sequenceDiagram
    DOCDB_DIRECT_CONNECTION=true
    ```
 
-   **Amazon DocumentDB:** when `USE_DOCUMENTDB=true`, Mongoose uses TLS with `tlsCAFile` (`DOCDB_TLS_CA_FILE`, default `/app/global-bundle.pem`), `retryWrites: false`, and `directConnection` from `DOCDB_DIRECT_CONNECTION` (default `true` unless set to `false`). In Docker, mount your RDS CA bundle to that path or override `DOCDB_TLS_CA_FILE`. For Atlas, leave `USE_DOCUMENTDB` unset or `false` so the driver uses Stable API options instead.
+   **Important configuration notes**
+   - **Amazon DocumentDB mode**: when `USE_DOCUMENTDB=true`, Mongoose switches to DocumentDB-safe options:
+     - TLS enabled with `DOCDB_TLS_CA_FILE` (default: `/app/global-bundle.pem`)
+     - `retryWrites: false`
+     - `directConnection` controlled by `DOCDB_DIRECT_CONNECTION` (default `true`, unless explicitly `false`)
+   - **MongoDB Atlas mode**: leave `USE_DOCUMENTDB` unset (or `false`) so the app uses MongoDB Stable API options.
+   - **Admin registration**: `role: admin` is accepted only for emails listed in `WHITELIST_ADMIN_EMAIL` (`src/config/index.ts`). Other users should register as `user`.
+   - **CORS policy**: in `development`, origins are permissive; in production, allowed origins must be present in `WHITELIST_ORIGINS`.
 
-   **Admin registration:** registering with `role: admin` is only allowed for emails on the server allowlist (`WHITELIST_ADMIN_EMAIL` in `src/config/index.ts`). Everyone else should register as `user` (default).
-
-   **CORS:** in `development`, arbitrary browser origins are allowed; in production, origins must match `WHITELIST_ORIGINS` in config (extend the array if you deploy a separate frontend).
-
-   > ⚠️ **Note:** Never commit `.env`; it holds secrets and connection strings.
+   > ⚠️ **Security note:** never commit `.env` or any credential/secret values.
 
 4. **Generate OpenAPI (for `/api-docs`)**
 
@@ -376,6 +382,14 @@ sequenceDiagram
    npm run start:prod
    ```
 
+## 🌐 Production Deployment
+
+- **Compute**: deployed on AWS EC2.
+- **Reverse proxy**: Nginx handles public traffic on ports `80/443` and proxies requests to the Node.js app on port `3000`.
+- **TLS/HTTPS**: Let's Encrypt certificates are issued and managed via Certbot on Nginx.
+- **Public domains**:
+  - `https://docs.blog-api.mk-ts-04.site`
+
 ### Docker
 
 Multi-stage image (Node 22): `npm run build` in the builder stage produces `dist/` and `docs/openapi.json`; the runtime image copies `dist` and `docs`, installs production dependencies, and runs `node dist/server.js`. Example:
@@ -386,6 +400,12 @@ docker run --env-file .env -p 3000:3000 blog-api
 ```
 
 For **DocumentDB** inside Docker, mount the CA bundle file and point `DOCDB_TLS_CA_FILE` at the mount path (see `.env.example` comments).
+
+## 🔗 Production Quick Links
+
+- **API health/base path**: `https://blog-api.mk-ts-04.site/api/v1/`
+- **Swagger UI**: `https://blog-api.mk-ts-04.site/api-docs`
+- **Documentation site**: `https://docs.blog-api.mk-ts-04.site/`
 
 ## 📡 API reference
 
@@ -474,5 +494,5 @@ This project is distributed under the **Apache License 2.0**. See the `LICENSE` 
 
 <p align="center">
   <b>© 2026 MT-KS-04. All rights reserved.</b><br/>
-  <em>A robust and scalable RESTful API for a Blog platform. Built with TypeScript, Express, and MongoDB (Mongoose).</em>
+  <em>A robust and scalable RESTful API for a Blog platform. Built with TypeScript, Express, and Mongoose (MongoDB Atlas / AWS DocumentDB compatible).</em>
 </p>
