@@ -1,9 +1,20 @@
-﻿# Table of contents
+# Table of contents
 
 * [Introduction](README.md)
 * [Installation](installation.md)
 * [Architecture](architecture.md)
-* [OpenAPI and Swagger](openapi.md)
+* [OpenAPI and Swagger](openapi/README.md)
+  * ```yaml
+    type: builtin:openapi
+    props:
+      models: true
+      downloadLink: true
+    dependencies:
+      spec:
+        ref:
+          kind: openapi
+          spec: api-v1-0-1
+    ```
 
 ## API reference (v1)
 

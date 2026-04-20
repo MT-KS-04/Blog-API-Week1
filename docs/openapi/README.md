@@ -1,15 +1,15 @@
-﻿# 🧭 OpenAPI and Swagger
+# OpenAPI and Swagger
 
-This project keeps the OpenAPI contract in [`openapi.json`](openapi.json) and serves interactive Swagger UI from the backend.
+This project keeps the OpenAPI contract in [`openapi.json`](../openapi.json) and serves interactive Swagger UI from the backend.
 
 ## 🌐 Production
 
-- Swagger UI: [https://mk-ts-04.site/api-docs](https://mk-ts-04.site/api-docs)
-- Raw OpenAPI JSON: [openapi.json](openapi.json)
+* Swagger UI: [https://mk-ts-04.site/api-docs](https://mk-ts-04.site/api-docs)
+* Raw OpenAPI JSON: [openapi.json](../openapi.json)
 
 ## 💻 Local (optional)
 
-- Swagger UI: `http://localhost:3000/api-docs`
+* Swagger UI: `http://localhost:3000/api-docs`
 
 ## 🔄 Regenerate the spec
 

@@ -1,9 +1,9 @@
-﻿# 🛠️ Installation
+# Installation
 
 ## ⚙️ Requirements
 
-- **Node.js** 22 (matches the Dockerfile) or a compatible LTS
-- **MongoDB** (Atlas or local) — connection string via environment variables
+* **Node.js** 22 (matches the Dockerfile) or a compatible LTS
+* **MongoDB** (Atlas or local) — connection string via environment variables
 
 ## 📦 Install dependencies
 
@@ -15,19 +15,19 @@ npm install
 
 Create a `.env` file in the project root (do not commit real secrets). Variable names follow `.env.example` in the repository:
 
-| Variable | Description |
-|----------|-------------|
-| `PORT` | HTTP port (defaults may use 3000 in code) |
-| `NODE_ENV` | `development` \| `production` \| `test` |
-| `MONGOOSE_URL` | MongoDB connection string (**not** `MONGO_URI` unless you change the code) |
-| `LOG_LEVELS` | Winston log level (e.g. `info`) |
-| `JWT_ACCESS_SECRET` | Secret used to sign access JWTs |
-| `JWT_REFRESH_SECRET` | Secret used to sign refresh JWTs |
-| `ACCESS_TOKEN_EXPIRY` | Access token lifetime (`ms`-style string, e.g. `15m`) |
-| `REFRESH_TOKEN_EXPIRY` | Refresh token lifetime |
-| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
-| `CLOUDINARY_API_KEY` | Cloudinary API key |
-| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
+| Variable                | Description                                                                |
+| ----------------------- | -------------------------------------------------------------------------- |
+| `PORT`                  | HTTP port (defaults may use 3000 in code)                                  |
+| `NODE_ENV`              | `development` \| `production` \| `test`                                    |
+| `MONGOOSE_URL`          | MongoDB connection string (**not** `MONGO_URI` unless you change the code) |
+| `LOG_LEVELS`            | Winston log level (e.g. `info`)                                            |
+| `JWT_ACCESS_SECRET`     | Secret used to sign access JWTs                                            |
+| `JWT_REFRESH_SECRET`    | Secret used to sign refresh JWTs                                           |
+| `ACCESS_TOKEN_EXPIRY`   | Access token lifetime (`ms`-style string, e.g. `15m`)                      |
+| `REFRESH_TOKEN_EXPIRY`  | Refresh token lifetime                                                     |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name                                                      |
+| `CLOUDINARY_API_KEY`    | Cloudinary API key                                                         |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret                                                      |
 
 {% hint style="warning" %}
 Never paste real secrets into public documentation or GitBook — document variable names only.
@@ -51,11 +51,8 @@ npm run build
 
 ## ▶️ Run the application
 
-- **Development (nodemon + ts-node):** `npm start`
-  This project does **not** define `npm run dev`; use `npm start`.
-
-- **Production (after `npm run build`):** `npm run start:prod`
-  Runs `node dist/server.js` — requires MongoDB and a valid `.env`.
+* **Development (nodemon + ts-node):** `npm start` This project does **not** define `npm run dev`; use `npm start`.
+* **Production (after `npm run build`):** `npm run start:prod` Runs `node dist/server.js` — requires MongoDB and a valid `.env`.
 
 ## 🐳 Docker
 
