@@ -2,6 +2,7 @@
 
 * [Introduction](README.md)
 * [Installation](installation.md)
+* [Architecture](architecture.md)
 * [OpenAPI and Swagger](openapi.md)
 
 ## API reference (v1)
